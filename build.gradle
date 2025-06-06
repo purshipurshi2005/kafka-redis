@@ -1,0 +1,91 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.3'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.google.protobuf' version '0.9.4'
+    id 'io.freefair.lombok' version '8.4'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'Kafka to Redis Status Service for message processing and status tracking'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+ext {
+    protobufVersion = '3.25.2'
+    resilience4jVersion = '2.1.0'
+    opentelemetryVersion = '1.36.0'
+    testcontainersVersion = '1.19.6'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Protobuf
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+    // Resilience4j
+    implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jVersion}"
+    implementation "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
+    implementation "io.github.resilience4j:resilience4j-bulkhead:${resilience4jVersion}"
+    implementation "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
+
+    // OpenTelemetry
+    implementation "io.opentelemetry:opentelemetry-api:${opentelemetryVersion}"
+    implementation "io.opentelemetry:opentelemetry-sdk:${opentelemetryVersion}"
+    // implementation "io.opentelemetry:opentelemetry-extension-annotations:1.32.0"
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:kafka:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+}
+
+protobuf {
+    generatedFilesBaseDir = "$buildDir/generated/sources/proto"
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named('bootBuildImage') {
+    imageName = 'kafka-redis-status-service:0.0.1-SNAPSHOT'
+}
+
+tasks.named('bootJar') {
+    archiveClassifier = 'boot'
+}
+
+tasks.named('jar') {
+    archiveClassifier = ''
+    enabled = true
+} 

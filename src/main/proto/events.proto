@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package com.example.kafkaredis.events.v1;
+
+option java_multiple_files = true;
+option java_package = "com.example.kafkaredis.events.v1";
+
+// Represents the status of a message in the system
+enum MessageStatus {
+  UNKNOWN = 0;
+  RECEIVED = 1;
+  PROCESSING = 2;
+  PROCESSED = 3;
+  FAILED = 4;
+  EXPIRED = 5;
+}
+
+// The main event message that will be consumed from Kafka
+message IncomingEvent {
+  // Unique identifier for the event
+  string request_id = 1;
+  
+  // Timestamp when the event was created (milliseconds since epoch)
+  int64 created_at = 2;
+  
+  // The actual payload of the event (JSON string)
+  string payload = 3;
+  
+  // Optional metadata about the event
+  map<string, string> metadata = 4;
+  
+  // Version of the event schema
+  int32 schema_version = 5;
+  
+  // Source system that generated this event
+  string source = 6;
+  
+  // Optional correlation ID for tracing
+  string correlation_id = 7;
+}
+
+// Response message for status queries
+message StatusResponse {
+  // The request ID this status is for
+  string request_id = 1;
+  
+  // Current status of the message
+  MessageStatus status = 2;
+  
+  // Timestamp when the status was last updated (milliseconds since epoch)
+  int64 updated_at = 3;
+  
+  // Optional error message if status is FAILED
+  string error_message = 4;
+  
+  // Optional metadata about the status
+  map<string, string> metadata = 5;
+} 

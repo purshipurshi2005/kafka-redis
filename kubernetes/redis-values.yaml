@@ -1,0 +1,21 @@
+architecture: standalone
+auth:
+  password: ""
+persistence:
+  enabled: false
+master:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+service:
+  type: ClusterIP
+  ports:
+    redis: 6379
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false 

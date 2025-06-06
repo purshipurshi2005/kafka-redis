@@ -1,0 +1,103 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Spring Boot
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+/logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Docker
+*.tar
+
+# Kubernetes secrets and sensitive files
+*-secret.yaml
+*secret*.yaml
+secrets/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Generated protobuf files (keep the source .proto files)
+/src/main/java/**/generated/
+
+# Temporary files
+tmp/
+temp/
+
+# IntelliJ IDEA
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# VS Code
+*.code-workspace
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+logs/
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Virtual Machine crash logs
+replay_pid*
+
+# Mac OS
+.DS_Store
+
+# Generated protobuf files
+**/generated-sources/ 

@@ -1,0 +1,116 @@
+spring:
+  application:
+    name: kafka-redis-status-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:status-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+kafka:
+  topics:
+    status: ${KAFKA_TOPIC_STATUS:status-topic}
+
+logging:
+  level:
+    root: INFO
+    com.example.kafkaredis: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.data.redis: INFO
+
+otel:
+  service:
+    name: ${OTEL_SERVICE_NAME:kafka-redis-status-service}
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+  metrics:
+    exporter: ${OTEL_METRICS_EXPORTER:otlp}
+  traces:
+    exporter: ${OTEL_TRACES_EXPORTER:otlp}
+  logs:
+    exporter: ${OTEL_LOGS_EXPORTER:otlp}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      redisOperations:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  bulkhead:
+    instances:
+      redisOperations:
+        maxConcurrentCalls: 50
+        maxWaitDuration: 500ms
+  ratelimiter:
+    instances:
+      statusEndpoint:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+
+# Custom application properties
+app:
+  kafka:
+    topic:
+      status: ${KAFKA_TOPIC_STATUS:status-topic}
+    topics:
+      incoming: incoming.events
+      dlt: incoming.events.dlt
+  redis:
+    ttl: 3600 # 1 hour in seconds
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: ${OAUTH2_ISSUER_URI:}
+          jwk-set-uri: ${OAUTH2_JWK_SET_URI:}
+  tracing:
+    service-name: ${TRACING_SERVICE_NAME:kafka-redis-status-service}
+    endpoint: ${TRACING_ENDPOINT:http://localhost:4317} 

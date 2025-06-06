@@ -1,0 +1,73 @@
+spring:
+  profiles: example
+  kafka:
+    bootstrap-servers: kafka.example.com:9092
+    consumer:
+      properties:
+        security.protocol: SSL
+        ssl.truststore.location: /etc/kafka/truststore.jks
+        ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASSWORD}
+        sasl.mechanism: SCRAM-SHA-512
+        sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${KAFKA_USERNAME}" password="${KAFKA_PASSWORD}";
+  data:
+    redis:
+      host: redis.example.com
+      port: 6379
+      password: ${REDIS_PASSWORD}
+      ssl: true
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 4
+
+server:
+  port: 8080
+  ssl:
+    enabled: true
+    key-store: /etc/ssl/keystore.p12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    kafka:
+      enabled: true
+    redis:
+      enabled: true
+
+app:
+  redis:
+    ttl-seconds: 86400  # 24 hours
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: https://auth.example.com/realms/example
+          jwk-set-uri: https://auth.example.com/realms/example/protocol/openid-connect/certs
+  tracing:
+    service-name: kafka-redis-status-service
+    endpoint: https://otel-collector.example.com:4317
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.example.kafkaredis: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.data.redis: INFO
+  pattern:
+    console: "%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/kafka-redis-status-service/application.log
+    max-size: 100MB
+    max-history: 30 

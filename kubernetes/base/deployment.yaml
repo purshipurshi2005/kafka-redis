@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-redis-status-service
+  labels:
+    app: kafka-redis-status-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kafka-redis-status-service
+  template:
+    metadata:
+      labels:
+        app: kafka-redis-status-service
+    spec:
+      containers:
+      - name: kafka-redis-status-service
+        image: kafka-redis-status-service:0.0.1-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8081
+          name: management
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "dev"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        - name: KAFKA_CONSUMER_GROUP
+          value: "status-service-group"
+        - name: KAFKA_TOPIC_STATUS
+          value: "status-topic"
+        - name: KAFKA_SECURITY_PROTOCOL
+          value: "SASL_PLAINTEXT"
+        - name: KAFKA_SASL_MECHANISM
+          value: "SCRAM-SHA-256"
+        - name: KAFKA_SASL_USERNAME
+          value: "user1"
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-user-passwords
+              key: client-passwords
+        - name: REDIS_HOST
+          value: "redis-master"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis
+              key: redis-password
+        - name: SERVER_PORT
+          value: "8080"
+        - name: MANAGEMENT_PORT
+          value: "8081"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: management
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: management
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: management
+          failureThreshold: 30
+          periodSeconds: 10 
