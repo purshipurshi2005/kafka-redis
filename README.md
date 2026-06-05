@@ -1,6 +1,6 @@
 # Kafka to Redis Status Service
 
-A resilient Spring Boot microservice that consumes Protobuf messages from Kafka, persists them with status in Redis (with TTL), and exposes a REST API for status retrieval.
+A resilient Best Spring Boot microservice that consumes Protobuf messages from Kafka, persists them with status in Redis (with TTL), and exposes a REST API for status retrieval.
 
 ## Features
 
