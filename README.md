@@ -2,7 +2,7 @@
 
 A resilient Best Spring Boot microservice that consumes Protobuf messages from Kafka, persists them with status in Redis (with TTL), and exposes a REST API for status retrieval.
 
-## Features
+## Features v1
 
 - Consumes Protobuf messages from Kafka topics
 - Persists message status in Redis with configurable TTL
